@@ -1,0 +1,40 @@
+CREATE DATABASE event_registration_system;
+USE event_registration_system;
+
+CREATE TABLE users (
+  id INT(11) AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  role ENUM('user', 'admin') DEFAULT 'user',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE events (
+  id INT(11) AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  date DATE NOT NULL,
+  time TIME NOT NULL,
+  location VARCHAR(255) NOT NULL,
+  description TEXT,
+  banner VARCHAR(255),
+  current_participants INT(11) DEFAULT 0,
+  max_participants INT(11) NOT NULL
+);
+
+CREATE TABLE registrations (
+  id INT(11) AUTO_INCREMENT PRIMARY KEY,
+  user_id INT(11) NOT NULL,
+  event_id INT(11) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+);
+
+
+
+Note : Jika ingin memasukan nama event bisa pakai kode di Bawah ini, untuk bagian poster atau gambar bisa diletakan di folder uploads dan ganti nama file jpg sesuai namanya
+
+INSERT INTO events (name, date, time, location, description, banner, max_participants) VALUES
+('Tech Conference 2024', '2024-11-15', '09:00:00', 'San Francisco', 'The latest in technology and innovation', 'tech_banner.jpg', 200),
+('Concert 2024', '2024-12-01', '18:00:00', 'New York', 'Join us for an amazing music concert!', 'concert_banner.jpg', 100);
