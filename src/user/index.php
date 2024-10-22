@@ -95,10 +95,10 @@ $defaultProfileImage = '../uploads/default-profile.png'; // Adjust this path as 
                         <?php foreach ($registrations as $registration): ?>
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4">
-                                    <a href="#" 
+                                    <a 
                                        onclick="showEventDetails(<?= json_encode($registration); ?>)"
-                                       class="text-blue-600 hover:text-blue-800">
-                                        <?= htmlspecialchars($registration['name']); ?>
+                                       class="text-primary">
+                                        
                                     </a>
                                 </td>
                                 <td class="px-6 py-4 text-gray-700"><?= htmlspecialchars($registration['date']); ?></td>
@@ -147,11 +147,7 @@ $defaultProfileImage = '../uploads/default-profile.png'; // Adjust this path as 
                         <?php foreach ($events as $event): ?>
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4">
-                                    <a href="#" 
-                                       onclick="showEventDetails(<?= json_encode($event); ?>)"
-                                       class="text-blue-600 hover:text-blue-800">
-                                        <?= htmlspecialchars($event['name']); ?>
-                                    </a>
+                                <?= htmlspecialchars($event['name']); ?>
                                 </td>
                                 <td class="px-6 py-4 text-gray-700"><?= htmlspecialchars($event['date']); ?></td>
                                 <td class="px-6 py-4 text-gray-700"><?= htmlspecialchars($event['location']); ?></td>
@@ -172,7 +168,7 @@ $defaultProfileImage = '../uploads/default-profile.png'; // Adjust this path as 
                                         </button>
                                     <?php else: ?>
                                         <a href="register_event.php?id=<?= $event['id']; ?>"
-                                           class="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                                           class="inline-block px-4 py-2 bg-primary text-white font-medium rounded-lg transition-colors">
                                             Register
                                         </a>
                                     <?php endif; ?>
