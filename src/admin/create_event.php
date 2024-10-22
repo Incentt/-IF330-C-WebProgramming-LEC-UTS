@@ -41,6 +41,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Create Event</title>
     <link href="../output.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1); /* Inverts the color to white */
+        }
+    </style>
+    <script>
+        function showDatePicker() {
+            document.getElementById('event-date').showPicker();
+        }
+    </script>
 
 </head>
 <body class="bg-dark w-3xl text-gray-200 flex items-center justify-center min-h-screen">
@@ -56,8 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="text" placeholder="Masukan nama" name="name" required class="w-full p-2 border text-white bg-dark border-gray-300 rounded">
 
             <label for="date" class="block text-white">Date:</label>
-            <input type="date" name="date" required class="w-full p-2 border text-white bg-dark border-gray-300 rounded">
-
+            <input type="date" onclick="showDatePicker()" name="date" id="event-date" required class="w-full p-2 border text-white bg-dark border-gray-300 rounded">
+            
             <label for="location" class="block text-white">Location:</label>
             <input type="text" name="location" placeholder="Masukan lokasi" required class="w-full p-2 border text-white bg-dark border-gray-300 rounded">
 

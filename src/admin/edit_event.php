@@ -54,23 +54,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Event</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link href="../output.css" rel="stylesheet">
+    <style>
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1); /* Inverts the color to white */
+        }
+    </style>
+    <script>
+        function showDatePicker() {
+            document.getElementById('event-date').showPicker();
+        }
+    </script>
 </head>
-<body>
-    <div class="container">
-        <h2>Edit Event</h2>
+<body class="bg-gray-900 text-gray-200 flex items-center justify-center min-h-screen">
+    <div class="bg-gray-800 rounded-lg shadow-md p-6 w-full max-w-md">
+        <h2 class="text-2xl font-bold mb-4 text-center">Edit Event</h2>
         <form method="POST" enctype="multipart/form-data">
-            <label for="name">Event Name:</label>
-            <input type="text" name="name" value="<?= htmlspecialchars($event['name']); ?>" required>
-            <label for="date">Date:</label>
-            <input type="date" name="date" value="<?= htmlspecialchars($event['date']); ?>" required>
-            <label for="location">Location:</label>
-            <input type="text" name="location" value="<?= htmlspecialchars($event['location']); ?>" required>
-            <label for="image">Event Image:</label>
-            <input type="file" name="image" accept="image/*">
-            <button type="submit">Update Event</button>
+            <div class="mb-4">
+                <label for="name" class="block text-sm font-medium text-gray-300">Event Name:</label>
+                <input type="text" name="name" value="<?= htmlspecialchars($event['name']); ?>" required class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-gray-200 focus:border-blue-500 focus:ring-blue-500">
+            </div>
+            <div class="mb-4">
+                <label for="date" class="block text-sm font-medium text-gray-300">Date:</label>
+                <input  onclick="showDatePicker()" type="date" id="event-date" name="date" value="<?= htmlspecialchars($event['date']); ?>" required class="block w-full rounded-md border-gray-600 bg-gray-700 text-white focus:border-blue-500 focus:ring-blue-500 cursor-pointer">
+            
+            
+            </div>
+            <div class="mb-4">
+                <label for="location" class="block text-sm font-medium text-gray-300">Location:</label>
+                <input type="text" name="location" value="<?= htmlspecialchars($event['location']); ?>" required class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-gray-200 focus:border-blue-500 focus:ring-blue-500">
+            </div>
+            <div class="mb-4">
+                
+                <label for="image" class="block text-sm font-medium text-gray-300">Event Image:</label>
+                <input type="file" name="image" accept="image/*" class="mt-1 block w-full text-gray-200">
+            </div>
+            <button type="submit" class="w-full bg-gradient text-white font-semibold py-2 rounded">Update Event</button>
         </form>
-        <a href="manage_events.php" class="btn">Back to Manage Events</a>
+        <a href="manage_events.php" class="mt-4 inline-block text-center w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 rounded">Back to Manage Events</a>
     </div>
 </body>
 </html>
