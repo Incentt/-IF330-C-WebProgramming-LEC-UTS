@@ -21,32 +21,31 @@ if ($user_id) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
-    <link rel="stylesheet" href="../styles.css">
-    <style>
-        .profile-image {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%; /* This makes the image round */
-            object-fit: cover; /* This ensures the image covers the entire area */
-            border: 2px solid #ddd; /* Optional: adds a border around the image */
-        }
-        .container {
-            text-align: center;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="../output.css" rel="stylesheet">
 </head>
-<body>
-    <div class="container">
-        <h2>User Profile</h2>
-        <img src="../uploads/<?= htmlspecialchars($user['profile_image']); ?>" alt="Profile Image" class="profile-image">
-        <h3><?= htmlspecialchars($user['username']); ?></h3>
-        <p>Email: <?= htmlspecialchars($user['email']); ?></p>
-        <p>Role: <?= htmlspecialchars($user['role']); ?></p>
-        <a href="manage_users.php" class="btn">Back to Manage Users</a>
+
+<body class="bg-dark text-gray-200 flex items-center justify-center min-h-screen">
+    <div class="bg-light-10 rounded-lg shadow-md p-6 w-full max-w-md text-center justify-center  flex flex-col">
+        <h2 class="text-2xl font-bold mb-4">User Profile</h2>
+        <div class="flex justify-center">
+            <img src="../uploads/<?= htmlspecialchars(string: $user['profile_image']) ?: 'default-profile.png'; ?>"
+                alt="Profile Image" class="w-24 h-24 rounded-full border-2 border-gray-600 object-cover mb-4">
+
+        </div>
+        <h3 class="text-xl font-semibold"><?= htmlspecialchars($user['username']); ?></h3>
+        <p class="text-gray-400">Email: <?= htmlspecialchars($user['email']); ?></p>
+        <p class="text-gray-400">Role: <?= htmlspecialchars($user['role']); ?></p>
+        <a href="manage_users.php"
+            class="mt-4 inline-block bg-gradient text-white font-semibold py-2 px-4 rounded">Back to
+            Manage Users</a>
     </div>
 </body>
+
 </html>

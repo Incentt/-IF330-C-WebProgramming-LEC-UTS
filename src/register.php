@@ -71,7 +71,9 @@ if (isset($_SESSION['success_message'])) {
 <body class="bg-dark flex flex-col items-center justify-center h-screen">
     <div class="flex rounded-3xl p-6 flex-col justify-between text-center py-8 w-80 bg-light-10 slide-in"
         id="register-form">
-        <h2 class="text-white font-bold text-2xl mb-6">Register</h2>
+        <h2 class="text-white font-bold text-2xl mb-6">Register <a
+                class="bg-gradient-to-r from-primary to-secondary inline-block text-transparent bg-clip-text">To Do
+                List</a></h2>
 
         <?php if ($error_message): ?>
             <div class="text-danger mb-2 text-xs"><?php echo $error_message; ?></div>

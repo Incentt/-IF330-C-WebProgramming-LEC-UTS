@@ -17,15 +17,18 @@ $stmt = $pdo->query("SELECT * FROM events");
 $events = $stmt->fetchAll();
 
 // Mengambil data registrasi pengguna
-$stmt = $pdo->prepare("SELECT e.name, e.date, e.location, e.image, r.id AS registration_id FROM registrations r JOIN events e ON r.event_id = e.id WHERE r.user_id = ?");
+// Fetch user's registrations with event details
+$stmt = $pdo->prepare("SELECT e.id AS event_id, e.name, e.date, e.location, e.image, r.id AS registration_id FROM registrations r JOIN events e ON r.event_id = e.id WHERE r.user_id = ?");
 $stmt->execute([$_SESSION['user_id']]);
 $registrations = $stmt->fetchAll();
 
-// Buat array untuk menyimpan event yang sudah terdaftar
-$registeredEventIds = array_column($registrations, 'registration_id');
+// Create an array of registered event IDs
+$registeredEventIds = array_column($registrations, 'event_id'); // Use 'event_id' instead of 'registration_id'
 
 // Assuming you have a default image named 'default-profile.png' in the uploads directory
 $defaultProfileImage = '../uploads/default-profile.png'; // Adjust this path as necessary
+
+
 ?>
 
 <!DOCTYPE html>
@@ -45,8 +48,8 @@ $defaultProfileImage = '../uploads/default-profile.png'; // Adjust this path as 
         <!-- Header Section -->
         <div class="flex justify-between items-center mb-8">
             <h2 class="text-3xl font-bold text-white">User Dashboard</h2>
-            <a href="../logout.php" 
-               class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
+            <a href="../logout.php"
+                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
                 Logout
             </a>
         </div>
@@ -57,20 +60,20 @@ $defaultProfileImage = '../uploads/default-profile.png'; // Adjust this path as 
             <div class="flex items-center space-x-6">
                 <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-gray-200 shadow-lg">
                     <?php if ($user['profile_image']): ?>
-                        <img src="../uploads/<?= htmlspecialchars($user['profile_image']); ?>" 
-                             alt="Profile Picture"
-                             class="w-full h-full object-cover">
+                        <img src="../uploads/<?= htmlspecialchars($user['profile_image']); ?>" alt="Profile Picture"
+                            class="w-full h-full object-cover">
                     <?php else: ?>
-                        <img src="<?= htmlspecialchars($defaultProfileImage); ?>" 
-                             alt="Default Profile Picture"
-                             class="w-full h-full object-cover">
+                        <img src="<?= htmlspecialchars($defaultProfileImage); ?>" alt="Default Profile Picture"
+                            class="w-full h-full object-cover">
                     <?php endif; ?>
                 </div>
                 <div class="space-y-2">
-                    <p class="text-gray-700">Username: <span class="font-medium"><?= htmlspecialchars($user['username']); ?></span></p>
-                    <p class="text-gray-700">Email: <span class="font-medium"><?= htmlspecialchars($user['email']); ?></span></p>
-                    <a href="edit_profile.php" 
-                       class="inline-block px-4 py-2 bg-gradient text-white font-medium rounded-lg transition-colors">
+                    <p class="text-gray-700">Username: <span
+                            class="font-medium"><?= htmlspecialchars($user['username']); ?></span></p>
+                    <p class="text-gray-700">Email: <span
+                            class="font-medium"><?= htmlspecialchars($user['email']); ?></span></p>
+                    <a href="edit_profile.php"
+                        class="inline-block px-4 py-2 bg-gradient text-white font-medium rounded-lg transition-colors">
                         Edit Profile
                     </a>
                 </div>
@@ -84,40 +87,43 @@ $defaultProfileImage = '../uploads/default-profile.png'; // Adjust this path as 
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gradient">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Event Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Location</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Image</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Actions</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                Event Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Date
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                Location</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                Image</th>
+                            <th
+                                class="px-6 w-60 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         <?php foreach ($registrations as $registration): ?>
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4">
-                                    <a 
-                                       onclick="showEventDetails(<?= json_encode($registration); ?>)"
-                                       class="text-primary">
-                                        
-                                    </a>
+                                    <a href="#"
+                                        onclick="showEventDetails(<?= json_encode($registration); ?>)"><?= htmlspecialchars($registration['name']); ?></a>
                                 </td>
                                 <td class="px-6 py-4 text-gray-700"><?= htmlspecialchars($registration['date']); ?></td>
                                 <td class="px-6 py-4 text-gray-700"><?= htmlspecialchars($registration['location']); ?></td>
                                 <td class="px-6 py-4">
                                     <?php if ($registration['image']): ?>
                                         <img src="../uploads/<?= htmlspecialchars($registration['image']); ?>"
-                                             alt="<?= htmlspecialchars($registration['name']); ?>"
-                                             class="h-12 w-12 rounded-lg object-cover">
+                                            alt="<?= htmlspecialchars($registration['name']); ?>"
+                                            class="h-12 w-12 rounded-lg object-cover">
                                     <?php else: ?>
                                         <span class="text-white">No Image</span>
                                     <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <form method="POST" 
-                                          action="cancel_registration.php?id=<?= $registration['registration_id']; ?>"
-                                          onsubmit="return confirmCancel();">
-                                        <button type="submit" 
-                                                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
+                                    <form method="POST"
+                                        action="cancel_registration.php?id=<?= $registration['registration_id']; ?>"
+                                        onsubmit="return confirmCancel();">
+                                        <button type="submit"
+                                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
                                             Cancel
                                         </button>
                                     </form>
@@ -136,39 +142,48 @@ $defaultProfileImage = '../uploads/default-profile.png'; // Adjust this path as 
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gradient">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Event Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Location</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Image</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Actions</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                Event Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Date
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                Location</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                Image</th>
+                            <th
+                                class="px-6 w-60 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         <?php foreach ($events as $event): ?>
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4">
-                                <?= htmlspecialchars($event['name']); ?>
+                                    <a href="#"
+                                        onclick="showEventDetails(<?= json_encode($event); ?>)"><?= htmlspecialchars($event['name']); ?></a>
+
                                 </td>
                                 <td class="px-6 py-4 text-gray-700"><?= htmlspecialchars($event['date']); ?></td>
                                 <td class="px-6 py-4 text-gray-700"><?= htmlspecialchars($event['location']); ?></td>
                                 <td class="px-6 py-4">
                                     <?php if ($event['image']): ?>
                                         <img src="../uploads/<?= htmlspecialchars($event['image']); ?>"
-                                             alt="<?= htmlspecialchars($event['name']); ?>"
-                                             class="h-12 w-12 rounded-lg object-cover">
+                                            alt="<?= htmlspecialchars($event['name']); ?>"
+                                            class="h-12 w-12 rounded-lg object-cover">
                                     <?php else: ?>
                                         <span class="text-white">No Image</span>
                                     <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-4">
                                     <?php if (in_array($event['id'], $registeredEventIds)): ?>
-                                        <button class="px-4 py-2 bg-gray-400 text-white font-medium rounded-lg cursor-not-allowed" 
-                                                disabled>
+                                        <button
+                                            class="px-4 py-2 bg-gray-400 text-white font-medium rounded-lg cursor-not-allowed"
+                                            disabled>
                                             Already Registered
                                         </button>
                                     <?php else: ?>
                                         <a href="register_event.php?id=<?= $event['id']; ?>"
-                                           class="inline-block px-4 py-2 bg-primary text-white font-medium rounded-lg transition-colors">
+                                            class="inline-block px-4 py-2 bg-primary text-white font-medium rounded-lg transition-colors">
                                             Register
                                         </a>
                                     <?php endif; ?>
@@ -182,13 +197,11 @@ $defaultProfileImage = '../uploads/default-profile.png'; // Adjust this path as 
     </div>
 
     <!-- Modal for Event Details -->
-    <div id="eventDetailsModal" 
-         class="hidden fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full">
+    <div id="eventDetailsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="flex justify-between items-center mb-4">
                 <h4 class="text-lg font-semibold text-gray-900" id="eventDetailsTitle"></h4>
-                <button onclick="closeModal()" 
-                        class="text-gray-400 hover:text-white transition-colors">
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white transition-colors">
                     &times; Close
                 </button>
             </div>

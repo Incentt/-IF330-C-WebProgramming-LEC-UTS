@@ -68,6 +68,8 @@ unset($_SESSION['error_message']); // Remove the error message from the session
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link href="./output.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
         .slide-in {
             transform: translateY(-30px);
@@ -85,7 +87,10 @@ unset($_SESSION['error_message']); // Remove the error message from the session
 <body class="bg-dark flex flex-col items-center justify-center h-screen">
     <div class="flex rounded-3xl p-6 flex-col justify-between text-center py-8 w-80 bg-light-10 slide-in"
         id="login-form">
-        <h2 class="text-white font-bold text-2xl mb-6">Login</h2>
+        <h2 class="text-white font-bold text-2xl mb-6">Login <a
+                class="bg-gradient-to-r from-primary to-secondary inline-block text-transparent bg-clip-text"
+                >To Do List</a></h1>
+        </h2>
         <?php if ($errorMessage): ?>
             <div class="error text-danger text-xs mb-2"><?php echo htmlspecialchars($errorMessage); ?></div>
         <?php endif; ?>
@@ -100,7 +105,7 @@ unset($_SESSION['error_message']); // Remove the error message from the session
                 <input placeholder="password" class="bg-dark p-2 text-xs text-white flex h-8 w-full shadow-sm"
                     type="password" name="password" id="password" required><br><br>
             </div>
-           
+
             <button
                 class="mb-2 bg-gradient rounded-full text-sm w-full font-bold px-6 py-1 text-white transition duration-400 ease-in-out hover:shadow-glowy"
                 type="submit">Login</button>
