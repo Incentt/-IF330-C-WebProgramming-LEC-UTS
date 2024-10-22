@@ -15,9 +15,9 @@ if (isset($_SESSION['user_id'])) {
     if ($user) {
         $_SESSION['role'] = $user['role'];
         if ($user['role'] == 'admin') {
-            header("Location: admin/admin_dashboard.php");
+            header("Location: admin");
         } else {
-            header("Location: user/user_dashboard.php");
+            header("Location: user");
         }
         exit();
     }
