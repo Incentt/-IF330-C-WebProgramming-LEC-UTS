@@ -2,12 +2,26 @@
 session_start();
 include('config.php');
 
-
+// Redirect if user is already logged in
 if (isset($_SESSION['user_id'])) {
-    header("Location: index.php");
-    exit;
-}
+    $user_id = $_SESSION['user_id'];
+    $sql = "SELECT role FROM users WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
 
+    if ($user) {
+        $_SESSION['role'] = $user['role'];
+        if ($user['role'] == 'admin') {
+            header("Location: admin/admin_dashboard.php");
+        } else {
+            header("Location: user/user_dashboard.php");
+        }
+        exit();
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
@@ -15,27 +29,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $sql = "SELECT * FROM users WHERE email = '$email'";
     $result = mysqli_query($conn, $sql);
-    $user = mysqli_fetch_assoc($result);
 
-    if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['role'] = $user['role'];
-        header("Location: index.php");
-        exit;
-    } else {
-        $_SESSION['error_message'] = "Invalid email or password.";
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit;
+    if ($result && mysqli_num_rows($result) > 0) {
+        $user = mysqli_fetch_assoc($result);
+
+        if (password_verify($password, $user['password'])) {
+            // Set session variables
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['role'] = $user['role'];
+
+            // Redirect based on the user role
+            if ($user['role'] == 'admin') {
+                header("Location: admin");
+            } else {
+                header("Location: user");
+            }
+            exit();
+        }
     }
+
+    // Invalid login
+    $_SESSION['error_message'] = "Invalid email or password.";
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
 }
 
 // Check for error message and display it
-if (isset($_SESSION['error_message'])) {
-    $errorMessage = $_SESSION['error_message'];
-    unset($_SESSION['error_message']); // Remove the error message from the session
-}
+$errorMessage = isset($_SESSION['error_message']) ? $_SESSION['error_message'] : '';
+unset($_SESSION['error_message']); // Remove the error message from the session
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -62,17 +86,17 @@ if (isset($_SESSION['error_message'])) {
     <div class="flex rounded-3xl p-6 flex-col justify-between text-center py-8 w-80 bg-light-10 slide-in"
         id="login-form">
         <h2 class="text-white font-bold text-2xl mb-6">Login</h2>
-        <?php if (isset($errorMessage)): ?>
-                <div class="error text-danger text-xs mb-2"><?php echo $errorMessage; ?></div>
-            <?php endif; ?>
+        <?php if ($errorMessage): ?>
+            <div class="error text-danger text-xs mb-2"><?php echo htmlspecialchars($errorMessage); ?></div>
+        <?php endif; ?>
         <form method="POST" action="login.php">
             <div class="flex flex-col items-start mb-4">
-                <h1 class="text-white text-xs mb-2" for="email">Email</h1>
+                <label class="text-white text-xs mb-2" for="email">Email</label>
                 <input class="bg-dark p-2 text-xs text-white flex h-8 w-full shadow-sm" type="email" name="email"
                     id="email" placeholder="example@gmail.com" required>
             </div>
             <div class="flex flex-col items-start">
-                <h1 class="text-white text-xs mb-2" for="password">Password</h1>
+                <label class="text-white text-xs mb-2" for="password">Password</label>
                 <input placeholder="password" class="bg-dark p-2 text-xs text-white flex h-8 w-full shadow-sm"
                     type="password" name="password" id="password" required><br><br>
             </div>

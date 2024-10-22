@@ -2,21 +2,15 @@
 require '../db_connection.php';
 session_start();
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
     exit();
 }
 
-$stmt = $pdo->query("SELECT * FROM events");
-$events = $stmt->fetchAll();
-
-if (isset($_GET['delete'])) {
-    $event_id = $_GET['delete'];
-    $stmt = $pdo->prepare("DELETE FROM events WHERE id = ?");
-    $stmt->execute([$event_id]);
-    header("Location: manage_events.php");
-    exit();
-}
+$user_id = $_SESSION['user_id'];
+$stmt = $pdo->prepare("SELECT events.name, events.date, events.location FROM registrations JOIN events ON registrations.event_id = events.id WHERE registrations.user_id = ?");
+$stmt->execute([$user_id]);
+$registered_events = $stmt->fetchAll();
 ?>
 
 <!DOCTYPE html>
@@ -24,7 +18,7 @@ if (isset($_GET['delete'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Events</title>
+    <title>Registered Events</title>
     <link rel="stylesheet" href="../styles.css">
     <style>
         table {
@@ -42,17 +36,12 @@ if (isset($_GET['delete'])) {
         tr:hover {
             background-color: #f5f5f5;
         }
-        img {
-            width: 100px;
-            height: auto;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Manage Events</h2>
+        <h2>Registered Events</h2>
         <a href="index.php" class="btn">Back to Dashboard</a>
-        <a href="create_event.php" class="btn">Create New Event</a>
 
         <table>
             <thead>
@@ -60,27 +49,14 @@ if (isset($_GET['delete'])) {
                     <th>Event Name</th>
                     <th>Date</th>
                     <th>Location</th>
-                    <th>Image</th> <!-- Kolom untuk gambar -->
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($events as $event): ?>
+                <?php foreach ($registered_events as $event): ?>
                 <tr>
                     <td><?= htmlspecialchars($event['name']); ?></td>
                     <td><?= htmlspecialchars($event['date']); ?></td>
                     <td><?= htmlspecialchars($event['location']); ?></td>
-                    <td>
-                        <?php if ($event['image']): ?>
-                            <img src="../uploads/<?= htmlspecialchars($event['image']); ?>" alt="<?= htmlspecialchars($event['name']); ?>">
-                        <?php else: ?>
-                            No Image
-                        <?php endif; ?>
-                    </td>
-                    <td>
-                        <a href="edit_event.php?id=<?= $event['id']; ?>">Edit</a>
-                        <a href="?delete=<?= $event['id']; ?>" onclick="return confirm('Are you sure you want to delete this event?');">Delete</a>
-                    </td>
                 </tr>
                 <?php endforeach; ?>
             </tbody>

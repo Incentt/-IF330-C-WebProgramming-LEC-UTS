@@ -1,30 +1,31 @@
 <?php
+require '../db_connection.php';
 session_start();
-include('config.php');
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: ../login.php");
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $date = $_POST['date'];
-    $time = $_POST['time'];
     $location = $_POST['location'];
-    $description = $_POST['description'];
-    $max_participants = $_POST['max_participants'];
 
-    $banner = $_FILES['banner']['name'];
-    $banner_tmp = $_FILES['banner']['tmp_name'];
-    $banner_folder = 'uploads/' . $banner;
+    // Handle file upload
+    $image = $_FILES['image']['name'];
+    $target = "../uploads/" . basename($image);
 
-    if (move_uploaded_file($banner_tmp, $banner_folder)) {
-        $sql = "INSERT INTO events (name, date, time, location, description, banner, max_participants)
-                VALUES ('$name', '$date', '$time', '$location', '$description', '$banner', '$max_participants')";
-
-        if (mysqli_query($conn, $sql)) {
-            echo "Event added successfully!";
+    // Insert event into database
+    $stmt = $pdo->prepare("INSERT INTO events (name, date, location, image) VALUES (?, ?, ?, ?)");
+    if ($stmt->execute([$name, $date, $location, $image])) {
+        // Move uploaded file
+        if (move_uploaded_file($_FILES['image']['tmp_name'], $target)) {
+            header("Location: manage_events.php");
+            exit();
         } else {
-            echo "Error: " . mysqli_error($conn);
+            echo "Failed to upload image.";
         }
-    } else {
-        echo "Failed to upload banner.";
     }
 }
 ?>
@@ -35,32 +36,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Event</title>
+    <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
-    <h2>Create Event</h2>
-    <form method="POST" action="create_event.php" enctype="multipart/form-data">
-        <label for="name">Event Name</label>
-        <input type="text" name="name" id="name" required><br><br>
-
-        <label for="date">Date</label>
-        <input type="date" name="date" id="date" required><br><br>
-
-        <label for="time">Time</label>
-        <input type="time" name="time" id="time" required><br><br>
-
-        <label for="location">Location</label>
-        <input type="text" name="location" id="location" required><br><br>
-
-        <label for="description">Description</label>
-        <textarea name="description" id="description" required></textarea><br><br>
-
-        <label for="max_participants">Max Participants</label>
-        <input type="number" name="max_participants" id="max_participants" required><br><br>
-
-        <label for="banner">Event Banner (Image)</label>
-        <input type="file" name="banner" id="banner" accept="image/*" required><br><br>
-
-        <button type="submit">Create Event</button>
-    </form>
+    <div class="container">
+        <h2>Create Event</h2>
+        <form method="POST" action="" enctype="multipart/form-data">
+            <label for="name">Event Name:</label>
+            <input type="text" name="name" required>
+            <label for="date">Date:</label>
+            <input type="date" name="date" required>
+            <label for="location">Location:</label>
+            <input type="text" name="location" required>
+            <label for="image">Event Image:</label>
+            <input type="file" name="image" accept="image/*" required>
+            <button type="submit">Create Event</button>
+        </form>
+        <a href="manage_events.php" class="btn">Back to Manage Events</a>
+    </div>
 </body>
 </html>

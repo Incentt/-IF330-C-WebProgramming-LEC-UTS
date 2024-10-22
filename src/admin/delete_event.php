@@ -1,22 +1,17 @@
 <?php
-include('config.php');
+require '../db_connection.php';
 session_start();
 
-if(!isset($_SESSION['admin_id'])) {
-    header('Location: login.php');
-    exit;
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: ../login.php");
+    exit();
 }
 
-if(isset($_GET['id'])) {
-    $event_id = $_GET['id'];
-    $query = "DELETE FROM events WHERE id = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("i", $event_id);
-
-    if($stmt->execute()) {
-        echo "Event deleted successfully!";
-    } else {
-        echo "Failed to delete event.";
-    }
+if (isset($_GET['delete'])) {
+    $event_id = $_GET['delete'];
+    $stmt = $pdo->prepare("DELETE FROM events WHERE id = ?");
+    $stmt->execute([$event_id]);
+    header("Location: manage_events.php");
+    exit();
 }
 ?>

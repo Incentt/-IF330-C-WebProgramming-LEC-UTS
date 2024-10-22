@@ -1,73 +1,76 @@
 <?php
-include('config.php');
+require '../db_connection.php';
 session_start();
 
-if(!isset($_SESSION['admin_id'])) {
-    header('Location: login.php');
-    exit;
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: ../login.php");
+    exit();
 }
 
-if($_SERVER['REQUEST_METHOD'] == 'POST') {
+// Memeriksa apakah 'id' ada dalam parameter GET
+if (!isset($_GET['id'])) {
+    header("Location: manage_events.php"); // Arahkan ke halaman manajemen jika ID tidak ada
+    exit();
+}
+
+$id = $_GET['id'];
+
+// Mengambil data event berdasarkan ID
+$stmt = $pdo->prepare("SELECT * FROM events WHERE id = ?");
+$stmt->execute([$id]);
+$event = $stmt->fetch();
+
+if (!$event) {
+    header("Location: manage_events.php"); // Arahkan jika event tidak ditemukan
+    exit();
+}
+
+// Proses pembaruan event
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $date = $_POST['date'];
     $location = $_POST['location'];
-    $description = $_POST['description'];
-    $max_participants = $_POST['max_participants'];
-    $status = $_POST['status'];
-    $event_id = $_POST['event_id'];
+    $image = $_FILES['image']['name']; // Ambil nama file gambar
 
-    if($_FILES['image']['name']) {
-        $image_name = $_FILES['image']['name'];
-        $image_tmp = $_FILES['image']['tmp_name'];
-        move_uploaded_file($image_tmp, "../uploads/$image_name");
-
-        $query = "UPDATE events SET name = ?, date = ?, location = ?, description = ?, max_participants = ?, status = ?, image = ? WHERE id = ?";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("ssssdsdi", $name, $date, $location, $description, $max_participants, $status, $image_name, $event_id);
+    // Update query
+    $stmt = $pdo->prepare("UPDATE events SET name = ?, date = ?, location = ?" . ($image ? ", image = ?" : "") . " WHERE id = ?");
+    
+    // Jika ada gambar baru, tambahkan ke query
+    if ($image) {
+        $stmt->execute([$name, $date, $location, $image, $id]);
+        move_uploaded_file($_FILES['image']['tmp_name'], "../uploads/" . $image); // Simpan gambar
     } else {
-        $query = "UPDATE events SET name = ?, date = ?, location = ?, description = ?, max_participants = ?, status = ? WHERE id = ?";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("ssssdsi", $name, $date, $location, $description, $max_participants, $status, $event_id);
+        $stmt->execute([$name, $date, $location, $id]);
     }
 
-    if($stmt->execute()) {
-        echo "Event updated successfully!";
-    } else {
-        echo "Failed to update event.";
-    }
-}
-
-if(isset($_GET['id'])) {
-    $event_id = $_GET['id'];
-    $query = "SELECT * FROM events WHERE id = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("i", $event_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $event = $result->fetch_assoc();
+    header("Location: manage_events.php?message=Event updated successfully!"); // Tambahkan parameter pesan
+    exit();
 }
 ?>
 
-<h2>Edit Event</h2>
-<form method="post" enctype="multipart/form-data">
-    <input type="hidden" name="event_id" value="<?php echo $event['id']; ?>">
-    <label>Event Name</label>
-    <input type="text" name="name" value="<?php echo htmlspecialchars($event['name']); ?>" required><br>
-    <label>Date</label>
-    <input type="date" name="date" value="<?php echo $event['date']; ?>" required><br>
-    <label>Location</label>
-    <input type="text" name="location" value="<?php echo htmlspecialchars($event['location']); ?>" required><br>
-    <label>Description</label>
-    <textarea name="description" required><?php echo htmlspecialchars($event['description']); ?></textarea><br>
-    <label>Max Participants</label>
-    <input type="number" name="max_participants" value="<?php echo $event['max_participants']; ?>" required><br>
-    <label>Status</label>
-    <select name="status" required>
-        <option value="open" <?php if($event['status'] == 'open') echo 'selected'; ?>>Open</option>
-        <option value="closed" <?php if($event['status'] == 'closed') echo 'selected'; ?>>Closed</option>
-        <option value="canceled" <?php if($event['status'] == 'canceled') echo 'selected'; ?>>Canceled</option>
-    </select><br>
-    <label>Event Image</label>
-    <input type="file" name="image"><br>
-    <button type="submit">Save Changes</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Event</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Edit Event</h2>
+        <form method="POST" enctype="multipart/form-data">
+            <label for="name">Event Name:</label>
+            <input type="text" name="name" value="<?= htmlspecialchars($event['name']); ?>" required>
+            <label for="date">Date:</label>
+            <input type="date" name="date" value="<?= htmlspecialchars($event['date']); ?>" required>
+            <label for="location">Location:</label>
+            <input type="text" name="location" value="<?= htmlspecialchars($event['location']); ?>" required>
+            <label for="image">Event Image:</label>
+            <input type="file" name="image" accept="image/*">
+            <button type="submit">Update Event</button>
+        </form>
+        <a href="manage_events.php" class="btn">Back to Manage Events</a>
+    </div>
+</body>
+</html>
